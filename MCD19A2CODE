@@ -1,0 +1,29 @@
+//Importar la coleccion que se va a utilizar, en este caso sera la coleccion MCD19A2
+//Iniciamos importando el shape que se va a utilzar para cortar la imagen, en este caso es el archivo "shapefinal"
+//Insertamos una variable para llamar a la coleccion, en este caso la variable es "modis1", seleccionamos la banda que vamos a usar en el comando select, y las fechas
+//Earth Engine baja las imagenes como un promedio, es decir en este caso tendremos el promedio de 24 y 25 de mayo, no lo hace ed manera diaria sino como un historico
+//MCD19A2 tiene un total de 13 bandas en este caso se ha seleccionado Optical Depth 047 y 055 para lograr el objetivo del estudio. 
+var modis1 = ee.ImageCollection('MODIS/006/MCD19A2_GRANULES')
+                  .select('Optical_Depth_047')
+                  .filterDate('2020-05-24', '2020-05-25');
+
+Map.addLayer(table, {}, 'shapefinal');
+var band_viz = {
+  min: 0,
+  max: 500,
+  palette: ['black', 'blue', 'purple', 'cyan', 'green', 'yellow', 'red']
+};
+var shapefinal = table
+Map.addLayer(modis1.mean().clip(shapefinal), band_viz, 'Optical Depth 047');
+
+Map.setCenter(-78,-2, 8);
+
+// Exportar Tiff
+Export.image.toDrive({
+image: modis1.mean (),
+description: 'MCD19A2_Optical_Depth_047_33',
+folder: 'Tesis AV',
+region: shapefinal, 
+scale: 30,
+crs: 'EPSG:4326',
+maxPixels: 1e10});
